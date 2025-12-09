@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -172,36 +173,22 @@ def plot_learning_curves(history, out_dir):
     plt.close()
 
 
-def plot_confusion_matrix(cm, class_names, out_path):
-    fig, ax = plt.subplots(figsize=(8, 6))
-    im = ax.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
-    ax.figure.colorbar(im, ax=ax)
-    ax.set(
-        xticks=np.arange(cm.shape[1]),
-        yticks=np.arange(cm.shape[0]),
-        xticklabels=class_names,
-        yticklabels=class_names,
-        ylabel="True label",
-        xlabel="Predicted label",
-        title="Confusion Matrix",
+def plot_confusion_matrix(cm, class_names, out_path, accuracy):
+    cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        cm_normalized, annot=True, fmt='.2%', cmap='Blues',
+        xticklabels=class_names, yticklabels=class_names,
+        cbar_kws={'label': 'Percentage'}
     )
-
-    plt.setp(ax.get_xticklabels(), rotation=45,
-             ha="right", rotation_mode="anchor")
-
-    # Text in cells
-    thresh = cm.max() / 2.0
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            ax.text(
-                j, i, format(cm[i, j], "d"),
-                ha="center", va="center",
-                color="white" if cm[i, j] > thresh else "black",
-            )
-
-    fig.tight_layout()
-    plt.savefig(out_path)
-    plt.close(fig)
+    plt.title(
+        "Test Confusion Matrix (%) - Accuracy: {:.2f}%".format(accuracy * 100), fontsize=16)
+    plt.xlabel('Predicted Label', fontsize=12)
+    plt.ylabel('True Label', fontsize=12)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=300, bbox_inches='tight')
+    plt.close()
 
 
 # -----------------------------
@@ -230,7 +217,8 @@ def main():
 
     # Model configuration
     backbone = "swin_tiny_patch4_window7_224"
-    num_classes = 8                           # TODO: Set number of classes
+    # FER2013 emotion classes: Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
+    num_classes = 7
 
     # Device and output
     device_str = "cuda"
@@ -362,8 +350,6 @@ def main():
 
     prec_macro = precision_score(y_true, y_pred, average="macro")
     rec_macro = recall_score(y_true, y_pred, average="macro")
-    prec_weighted = precision_score(y_true, y_pred, average="weighted")
-    rec_weighted = recall_score(y_true, y_pred, average="weighted")
 
     print("\n=== Test Results ===")
     print(f"Loss: {test_loss:.4f}")
@@ -371,8 +357,6 @@ def main():
     print(f"Macro Precision: {prec_macro:.4f}")
     print(f"Macro Recall: {rec_macro:.4f}")
     print(f"Macro F1: {test_macro_f1:.4f}")
-    print(f"Weighted Precision: {prec_weighted:.4f}")
-    print(f"Weighted Recall: {rec_weighted:.4f}")
 
     # Detailed classification report
     print("\nClassification report:")
@@ -389,7 +373,7 @@ def main():
     class_names = [str(i) for i in range(num_classes)]
 
     cm_path = os.path.join(out_dir, "confusion_matrix.png")
-    plot_confusion_matrix(cm, class_names, cm_path)
+    plot_confusion_matrix(cm, class_names, cm_path, test_acc)
     print(f"\nConfusion matrix saved to: {cm_path}")
     print(f"Curves saved to: {out_dir}")
 
