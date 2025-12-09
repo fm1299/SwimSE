@@ -367,10 +367,8 @@ def main():
     np.savetxt(os.path.join(out_dir, "confusion_matrix.csv"),
                cm, delimiter=",", fmt="%d")
 
-    # If you have fixed label names, define them here, e.g.:
-    # class_names = ["anger", "contempt", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
-    # Make sure length == num_classes and order matches labels.
-    class_names = [str(i) for i in range(num_classes)]
+    class_names = ["Angry", "Disgust", "Fear",
+                   "Happy", "Sad", "Surprise", "Neutral"]
 
     cm_path = os.path.join(out_dir, "confusion_matrix.png")
     plot_confusion_matrix(cm, class_names, cm_path, test_acc)
