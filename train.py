@@ -1,4 +1,3 @@
-# train_swin_se_sam.py
 import os
 
 import matplotlib.pyplot as plt
@@ -214,15 +213,12 @@ def main():
     # ===========================================
 
     # Dataset paths (CSVs and image directories for each split)
-    train_csv = "path/to/train.csv"           # TODO: Set your train CSV path
-    # TODO: Set your train images directory
-    train_img_dir = "path/to/train/images"
-    val_csv = "path/to/val.csv"               # TODO: Set your validation CSV path
-    # TODO: Set your validation images directory
-    val_img_dir = "path/to/val/images"
-    test_csv = "path/to/test.csv"             # TODO: Set your test CSV path
-    # TODO: Set your test images directory
-    test_img_dir = "path/to/test/images"
+    train_csv = "rafdb/train_labels.csv"
+    train_img_dir = "rafdb/train"
+    val_csv = "rafdb/valid_labels.csv"
+    val_img_dir = "rafdb/valid"
+    test_csv = "rafdb/test_labels.csv"
+    test_img_dir = "rafdb/test"
 
     # Training hyperparameters
     epochs = 25
@@ -266,14 +262,14 @@ def main():
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=args.batch_size,
+        batch_size=batch_size,
         shuffle=False,
         num_workers=4,
         pin_memory=True,
     )
     test_loader = DataLoader(
         test_ds,
-        batch_size=args.batch_size,
+        batch_size=batch_size,
         shuffle=False,
         num_workers=4,
         pin_memory=True,
